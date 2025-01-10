@@ -121,3 +121,25 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# sylva-units-alike
+git_repo_spec_default:
+  interval: 60m0s
+
+oci_repo_spec_default:
+  interval: 60m0s
+
+source_templates:
+  kind: GitRepository
+  spec:
+    url: https://github.com/helm/examples.git
+    ref:
+      tag: hello-world-0.1.0
+
+unit_kustomization_spec_default: # default .spec for a Kustomization
+  force: false
+  prune: true
+  interval: 15m
+  retryInterval: 1m
+  timeout: 30s
+

@@ -1,0 +1,26 @@
+kind: SylvaWorkloadCluster
+apiVersion: workloadclusteroperator.sylva/v1alpha1
+metadata:
+  name: test1-wc-capd
+  # namespace: team-a
+spec:
+  k8sVersion: "1.30"
+  infrastructure: docker
+  controlPlane:
+    provider: rke2
+    replicas: 1
+  machineDeployments:
+    additionalProperties:
+      replicas: 0
+  clusterSettings:
+    # name: test1-wc-capd
+    # capi_providers:
+    #   infra_provider: capd
+    #   bootstrap_provider: cabpr
+    # control_plane_replicas: 1
+    capd:
+      image_name: registry.gitlab.com/sylva-projects/sylva-elements/container-images/rke2-in-docker:0.1.3-v1.30.7rke2r1
+  enabledUnits:
+    keycloak: false
+    harbor: false
+    minio-monitoring: false
