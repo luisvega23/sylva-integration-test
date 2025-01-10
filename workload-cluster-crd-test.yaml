@@ -2,7 +2,7 @@ kind: SylvaWorkloadCluster
 apiVersion: workloadclusteroperator.sylva/v1alpha1
 metadata:
   name: test1-wc-capd
-  # namespace: team-a
+  namespace: whitestack-develop
 spec:
   k8sVersion: "1.30"
   infrastructure: docker
