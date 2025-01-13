@@ -1,2 +1,2 @@
 resources:
-- workload-cluster-crd-test.yaml
+- wc-capo-test.yaml
