@@ -1,0 +1,25 @@
+kind: SylvaWorkloadCluster
+apiVersion: workloadclusteroperator.sylva/v1alpha1
+metadata:
+  name: test-wc-capo
+  namespace: wc-capo
+spec:
+  k8sVersion: "1.30"
+  infrastructure: openstack
+  controlPlane:
+    provider: rke2
+    replicas: 1
+  machineDeployments:
+    additionalProperties:
+      replicas: 0
+  clusterSettings:
+    capo:
+      ssh_key_name: sylva-capd   # replace me
+      image_key: ubuntu-jammy-hardened-rke2-1-29-9  # only default image is supported
+      network_id: 3dc41d4d-c67b-432f-a75b-b503d0ccdcc1  # replace me
+      flavor_name: "m1.xlarge"
+      # rootVolume: 50
+      # volumeType: ceph_ssd
+    secretValues:
+      path: wc
+      key: capo
