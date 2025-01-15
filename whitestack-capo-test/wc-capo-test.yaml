@@ -14,6 +14,7 @@ spec:
       replicas: 0
   enabledUnits:
     cinder-csi: false
+    calico: true
     # monitoring: false
     # minio-monitoring: false
     keycloak: false
