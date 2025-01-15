@@ -25,8 +25,9 @@ spec:
       image_key: ubuntu-jammy-hardened-rke2-1-30-7  # only default image is supported
       network_id: 3dc41d4d-c67b-432f-a75b-b503d0ccdcc1  # replace me
       flavor_name: "m1.xlarge"
-      # rootVolume: 50
-      volumeType: local-path
+      rootVolume:
+        diskSize: 50
+        #volumeType: local-path
   secretValues:
     path: wc
     key: capo
