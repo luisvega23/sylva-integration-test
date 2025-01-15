@@ -18,6 +18,7 @@ spec:
     # minio-monitoring: false
     keycloak: false
     # kyverno: false
+    local-path-provisioner: true
   clusterSettings:
     capo:
       ssh_key_name: sylva-capd   # replace me
