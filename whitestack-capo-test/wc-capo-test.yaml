@@ -25,7 +25,7 @@ spec:
       network_id: 3dc41d4d-c67b-432f-a75b-b503d0ccdcc1  # replace me
       flavor_name: "m1.xlarge"
       # rootVolume: 50
-      # volumeType: ceph_ssd
+      volumeType: local-path
   secretValues:
     path: wc
     key: capo
