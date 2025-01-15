@@ -15,9 +15,9 @@ spec:
   enabledUnits:
     cinder-csi: false
     monitoring: false
-    minio-monitoring: false
+    # minio-monitoring: false
     keycloak: false
-    kyverno: false
+    # kyverno: false
   clusterSettings:
     capo:
       ssh_key_name: sylva-capd   # replace me
