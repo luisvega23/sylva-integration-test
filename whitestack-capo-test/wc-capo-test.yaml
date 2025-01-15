@@ -1,7 +1,7 @@
 kind: SylvaWorkloadCluster
 apiVersion: workloadclusteroperator.sylva/v1alpha1
 metadata:
-  name: test-wc-capo
+  name: wc1
   namespace: wc-test
 spec:
   k8sVersion: "1.30"
