@@ -15,10 +15,7 @@ spec:
   enabledUnits:
     cinder-csi: false
     calico: true
-    # monitoring: false
-    # minio-monitoring: false
     keycloak: false
-    # kyverno: false
     local-path-provisioner: true
   clusterSettings:
     capo:
@@ -26,9 +23,9 @@ spec:
       image_key: ubuntu-jammy-hardened-rke2-1-30-7  # only default image is supported
       network_id: 3dc41d4d-c67b-432f-a75b-b503d0ccdcc1  # replace me
       flavor_name: "m1.xlarge"
-      rootVolume:
-        diskSize: 50
-        #volumeType: local-path
+      # rootVolume:
+      #   diskSize: 50
+      #   #volumeType: local-path
   secretValues:
     path: wc
     key: capo
