@@ -1,0 +1,178 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    copy-from-bootstrap-to-management: ""
+  name: sylva-system
+---
+apiVersion: v1
+data:
+  values: |+
+    ---
+    sylva_diskimagebuilder_images:
+      ubuntu-jammy-hardened-rke2-1-30-7:
+        enabled: true
+
+    cluster:
+      control_plane_replicas: 1
+      name: management-capo
+      capi_providers:
+        infra_provider: capo
+        bootstrap_provider: cabpr
+
+      capo:
+        image_key: ubuntu-jammy-hardened-rke2-1-30-7  # OpenStack Glance image (key of image in sylva_diskimagebuilder_images/os_images)
+        ssh_key_name: sylva-capd # OpenStack Nova SSH keypair is provided by runner context in CI
+        network_id: 3dc41d4d-c67b-432f-a75b-b503d0ccdcc1 # OpenStack Neutron network id is provided by runner context in CI
+        flavor_name: "m1.xlarge"
+
+      machine_deployments:
+        md0:
+          replicas: 0
+          capo:
+            failure_domain: region0
+
+    openstack:
+      storageClass:
+        # name: "cinder-ceph-ssd"
+        type: "my-cinder-volume-type"
+
+    proxies:
+      # put your own proxy settings here if you need
+      http_proxy: ""
+      https_proxy: ""
+      no_proxy: ""
+
+    units:
+      cinder-csi:
+        enabled: false
+      thanos:
+        enabled: false
+      logging:
+        enabled: false
+      kubevirt:
+        enabled: false
+      harbor:
+        enabled: false
+      monitoring:
+        enabled: false
+      flux-webui:
+        enabled: true
+      capd:
+        enabled: true
+      minio-monitoring:
+        enabled: false
+      keycloak:
+        enabled: false
+
+
+    workload_clusters:
+      sylva_source:
+        type: git
+        url: https://gitlab.com/sylva-projects/sylva-core.git
+        tag: 1.3.0
+      teams:
+        wc-test:
+          kustomization_spec:
+            interval: 15m
+          gitrepository_spec:
+            url: https://github.com/luisvega23/sylva-integration-test
+            ref:
+              branch: test-wco
+            interval: 5m
+          gitrepository_path: "./whitestack-capo-test"
+
+    # configure containerd registry mirrors following https://github.com/containerd/containerd/blob/main/docs/hosts.md
+    # see charts/syla-units/values.yaml for a more detailled example
+    # registry_mirrors:
+    #   hosts_config:
+    #     docker.io:
+    #     - mirror_url: http://your.mirror/docker
+
+    # add ntp servers if you need
+    ntp:
+      enabled: false
+      servers:
+      # - 1.2.3.4
+      # - 1.2.3.5
+
+kind: ConfigMap
+metadata:
+  labels:
+    copy-from-bootstrap-to-management: ""
+  name: sylva-units-values
+  namespace: sylva-system
+---
+apiVersion: v1
+data:
+  secrets: ""
+kind: Secret
+metadata:
+  labels:
+    copy-from-bootstrap-to-management: ""
+  name: sylva-units-secrets
+  namespace: sylva-system
+type: Opaque
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  labels:
+    copy-from-bootstrap-to-management: ""
+  name: sylva-units
+  namespace: sylva-system
+spec:
+  chart:
+    spec:
+      chart: charts/sylva-units
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: sylva-units
+      valuesFiles:
+      - charts/sylva-units/values.yaml
+  driftDetection:
+    mode: enabled
+  interval: 10m0s
+  values:
+    source_templates:
+      sylva-core:
+        spec:
+          ref:
+            commit: CURRENT_COMMIT
+          url: SYLVA_CORE_REPO
+  valuesFrom:
+  - kind: Secret
+    name: sylva-units-secrets
+    valuesKey: secrets
+  - kind: ConfigMap
+    name: sylva-units-values
+    valuesKey: values
+  - kind: ConfigMap
+    name: capo-cluster-resources
+    optional: true
+    targetPath: cluster_virtual_ip
+    valuesKey: allocated_ip
+  - kind: ConfigMap
+    name: capo-cluster-resources
+    optional: true
+    targetPath: openstack.floating_ip
+    valuesKey: allocated_fip
+  - kind: ConfigMap
+    name: cluster-public-endpoint
+    optional: true
+    targetPath: cluster_public_endpoint
+    valuesKey: endpoint
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  labels:
+    copy-from-bootstrap-to-management: ""
+  name: sylva-units
+  namespace: sylva-system
+spec:
+  interval: 120m
+  ref:
+    commit: CURRENT_COMMIT
+  url: SYLVA_CORE_REPO
