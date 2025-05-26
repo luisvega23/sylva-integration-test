@@ -1,0 +1,150 @@
+cluster_virtual_ip: 10.188.36.149
+
+cluster:
+  capi_providers:
+    infra_provider: capm3
+    bootstrap_provider: cabpr
+
+  # To allow cpuManager, enable it when kubevirt is enabled with feature gate CPUManager
+  # kubelet_extra_args:
+  #   max-pods: "228"
+  #   #node-labels: "feature.node.kubernetes.io/network-sriov.capable=true" ##should be set automatically by rancher-nfd
+  #   feature-gates: "TopologyManager=true,CPUManager=true"
+  #   topology-manager-policy: "best-effort"
+  #   cpu-manager-policy: "static"
+  #   system-reserved: "cpu=100m"
+  #   kube-reserved: "cpu=100m"
+
+  control_plane_replicas: 1
+
+  rke2:
+    additionalUserData:
+      config: # String to allows users to specify additional cloud-init configuration
+        users:
+          - name: ubuntu
+            groups: users,sylva-ops
+            sudo: ALL=(ALL) NOPASSWD:ALL
+            shell: /bin/bash
+            lock_passwd: false
+            passwd: "put your password hash here" # (copy pasted from /etc/shadow or created with "mkpasswd" --method=SHA-512 --stdin")
+            ssh_authorized_keys:
+              - ssh-rsa AAAA...... YOUR KEY HERE ....UqnQ==
+
+  capm3:
+    os_image_selector:
+      os: ubuntu
+      hardened: true
+    networks:
+      primary:
+        subnet: 10.188.36.128/26
+        gateway: 10.188.36.129
+        start: 10.188.36.148
+        end: 10.188.36.148
+      provisioning:
+        subnet: 10.199.39.192/27
+        gateway: 10.199.39.193
+        start: 10.199.39.219
+        end: 10.199.39.219
+    dns_servers:
+    - 1.2.3.4
+    - 8.8.8.8
+
+  control_plane:   # tweak network configuration as needed ...
+    capm3:
+      networks:
+        provisioning:
+          interface: bond0
+        primary:
+          interface: bond0.13
+
+    network_interfaces:
+      # for CAPM3 folowing are used and mapped to Metal3Data.spec.template.spec.networkData.links
+      bond0:
+        type: bond
+        interfaces:
+          - ens1f0
+          - ens1f1
+        vlans:
+          - id: 13
+      ens1f0:
+        type: phy
+      ens1f1:
+        type: phy
+
+  machine_deployment_default: # tweak as needed ...
+    capm3:
+      networks:
+        provisioning:
+          interface: bond0
+        primary:
+          interface: bond0.13
+
+  machine_deployments:
+    md0:
+      infra_provider: capm3
+      replicas: 2
+      capm3:
+        hostSelector:
+          matchLabels:
+            cluster-role: worker # tweak as needed must match cluster-role defined in baremetal_hosts
+      network_interfaces: # tweak network configuration as needed ...
+        bond0:
+          type: bond
+          interfaces:
+            - ens1f0
+            - ens1f1
+          vlans:
+            - id: 13
+        ens1f0:
+          type: phy
+        ens1f1:
+          type: phy
+
+  baremetal_hosts:
+    # this example is based on what worked on an HP Proliant DL360 Gen10
+    my-server:  # corresponding credentials need to be set in secrets.yaml
+      longhorn_disk_config:
+        - path: "/var/longhorn/disks/disk_by-path_pci-0000:18:00.0-scsi-0:3:111:0"
+          storageReserved: 0
+          allowScheduling: true
+          tags:
+            - ssd
+            - fast
+        - path: "/var/longhorn/disks/sde"
+          storageReserved: 0
+          allowScheduling: true
+          tags:
+            - hdd
+            - slow
+      bmh_metadata:
+        labels:
+          cluster-role: control-plane
+          longhorn: "true"
+      bmh_spec:
+        description: Downstream dev clusters
+        online: true
+        externallyProvisioned: false
+        bmc:
+          address: redfish-virtualmedia://66.66.66.66/redfish/v1/Systems/1   # put the real BMC address here!
+          disableCertificateVerification: true
+        bootMACAddress: ba:ad:00:c0:ff:ee    # put the real address here!
+        bootMode: legacy
+        rootDeviceHints:
+          hctl: 2:1:0:0   # tweak as needed
+    my-server2:  # corresponding credentials need to be set in secrets.yaml
+      bmh_metadata:
+        labels:
+          cluster-role: worker
+          longhorn: "true"
+      bmh_spec:
+        description: Downstream dev clusters
+        online: true
+        externallyProvisioned: false
+        bmc:
+          address: redfish-virtualmedia://66.66.66.67/redfish/v1/Systems/1   # put the real BMC address here ()
+          disableCertificateVerification: true
+        bootMACAddress: ba:ad:00:c0:ff:ef    # put the real address here!
+        bootMode: legacy
+        rootDeviceHints:
+          hctl: 2:1:0:0   # tweak as needed
+

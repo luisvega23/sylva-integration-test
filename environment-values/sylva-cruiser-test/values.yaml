@@ -1,0 +1,194 @@
+---
+cluster:
+  capi_providers:
+    infra_provider: capo
+    bootstrap_provider: cabpr
+  control_plane_replicas: 1
+  capo:
+    os_image_selector:
+      os: ubuntu
+      hardened: true
+    ssh_key_name: sylva-deployer # OpenStack Nova SSH keypair is provided by runner context in CI
+    network_id: cb21c2ea-5cd3-48fd-966c-7679b1b9f269 # OpenStack Neutron network id on which machine will be deployed
+    flavor_name: m1.xlarge
+    rootVolume:
+      diskSize: 160
+  machine_deployments:
+    md0:
+      replicas: 1
+      capo:
+        # failure_domain: nova
+        os_image_selector:
+          os: ubuntu
+          hardened: true
+        flavor_name: m1.xlarge
+        rootVolume:
+          diskSize: 160
+
+openstack:
+  storageClass:
+    # name: "cinder-ceph-ssd"
+    type: "sylva-volume"
+
+units:
+  cinder-csi:
+    enabled: true
+  ceph-csi-cephfs:
+    enabled: false
+  longhorn:
+    enabled: false
+  vsphere-csi-driver:
+    enabled: false
+  coredns:
+    enabled: true
+# From here onwards is our deployment for summa !
+  summa5g-deployment-namespace:
+    enabled: false
+    info:
+      description: Namespace with privileges
+    repo: summanetwork
+    unit_templates: []
+    depends_on:
+      cluster-ready: true
+    kustomization_spec:
+      targetNamespace: summa5g-deployment
+      path: ./common-elements/
+  pxc-operator:
+    enabled: false
+    info:
+      description: Percona operator
+    repo: percona
+    unit_templates: []
+    depends_on:
+      summa5g-deployment-namespace: true
+    helmrelease_spec:
+      targetNamespace: summa5g-deployment
+      chart:
+        spec:
+          chart: ./charts/pxc-operator
+  pxc-db:
+    enabled: false
+    info:
+      description: Percona database
+    repo: percona
+    unit_templates: []
+    depends_on: 
+      pxc-operator: true
+    helmrelease_spec:
+      targetNamespace: summa5g-deployment
+      values:
+        unsafeFlags:
+          pxcSize: true
+          proxySize: true
+        persistence:
+          storageClass: "cinder-csi"
+        pxc:
+          ssl: false
+          image:
+            tag: "5.7"
+          clusterSecretName: percona-db-secret
+          size: 1
+        haproxy:
+          size: 1
+        secrets:
+          root: "660qg6QW+l8-(]xO"
+      chart:
+        spec:
+          chart: ./charts/pxc-db
+  redis-operator:
+    enabled: false
+    info:
+      description: Redis operator
+    depends_on:
+      summa5g-deployment-namespace: true
+    repo: summanetwork
+    unit_templates: []
+    kustomization_spec:
+      targetNamespace: summa5g-deployment
+      path: ./redis/redis-operator/
+  redis-cluster:
+    enabled: false
+    info:
+      description: Redis operator
+    depends_on:
+      redis-operator: true
+    repo: summanetwork
+    unit_templates: []
+    kustomization_spec:
+      targetNamespace: summa5g-deployment
+      path: ./redis/redis-cluster/
+  redis-database:
+    enabled: false
+    info:
+      description: Redis operator
+    depends_on:
+      redis-cluster: true
+    repo: summanetwork
+    unit_templates: []
+    kustomization_spec:
+      targetNamespace: summa5g-deployment
+      path: ./redis/redis-database/
+  udr-job:
+    enabled: false
+    info:
+      description: UDR-Job for the 5g core. Function in charge of creating or updating the database schema.
+    depends_on:
+      redis-database: true
+      pxc-db: true
+    repo: summanetwork
+    unit_templates: []
+    kustomization_spec:
+      targetNamespace: summa5g-deployment
+      path: ./CNFs/summanetworks/UDR/updates/
+  udr:
+    enabled: false
+    info:
+      description: UDR for the 5g core.
+    depends_on:
+      redis-database: true
+      pxc-db: true
+      udr-job: true
+    repo: summanetwork
+    unit_templates: []
+    kustomization_spec:
+      targetNamespace: summa5g-deployment
+      path: ./CNFs/summanetworks/UDR/component/
+  ausf:
+    enabled: false
+    info:
+      description: AUSF for the 5g core.
+    depends_on:
+      redis-database: true
+      pxc-db: true
+    repo: summanetwork
+    unit_templates: []
+    kustomization_spec:
+      targetNamespace: summa5g-deployment
+      path: ./CNFs/summanetworks/AUSF/
+  udm:
+    enabled: false
+    info:
+      description: UDM for the 5g core.
+    depends_on:
+      redis-database: true
+      pxc-db: true
+    repo: summanetwork
+    unit_templates: []
+    kustomization_spec:
+      targetNamespace: summa5g-deployment
+      path: ./CNFs/summanetworks/UDM/
+
+
+source_templates:
+  summanetwork:
+    kind: GitRepository
+    spec:
+      url: https://github.com/luisvega23/summanetwork.git  
+      ref:
+        branch: main
+  percona:
+    kind: GitRepository
+    spec:
+      url: https://github.com/percona/percona-helm-charts.git
+      ref:
+        branch: main

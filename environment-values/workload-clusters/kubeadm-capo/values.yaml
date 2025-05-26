@@ -1,0 +1,21 @@
+cluster:
+  capi_providers:
+    infra_provider: capo
+    bootstrap_provider: cabpk
+  control_plane_replicas: 1
+  capo:
+    os_image_selector:
+      os: ubuntu
+      hardened: false
+    ssh_key_name: # put the name of your nova SSH keypair here
+    network_id: # OpenStack Neutron network id on which machine will be deployed
+  machine_deployments:
+    md0:
+      replicas: 1
+      capo:
+        failure_domain: region0
+
+openstack:
+  storageClass:
+    name: "cinder-ceph-ssd"
+    type: "ceph_ssd"
