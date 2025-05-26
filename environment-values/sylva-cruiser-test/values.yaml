@@ -183,7 +183,7 @@ source_templates:
   summanetwork:
     kind: GitRepository
     spec:
-      url: https://github.com/luisvega23/summanetwork.git  
+      url: https://github.com/luisvega23/summanetwork.git  # add token later
       ref:
         branch: main
   percona:
