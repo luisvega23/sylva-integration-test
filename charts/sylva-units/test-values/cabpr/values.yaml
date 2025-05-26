@@ -1,0 +1,3 @@
+cluster:
+  capi_providers:
+    bootstrap_provider: cabpr
