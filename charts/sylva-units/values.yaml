@@ -25,7 +25,7 @@ source_templates: # template to generate Flux GitRepository/OCIRepository resour
   sylva-core:
     kind: GitRepository
     spec:
-      url: https://gitlab.com/sylva-projects/sylva-core.git
+      url: https://github.com/luisvega23/sylva-integration-test
       ref:
         # the sylva-core framework will always override this ref so that the
         # currently checked out commit of sylva-core is used by sylva-units
