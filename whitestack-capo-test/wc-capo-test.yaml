@@ -5,6 +5,8 @@ metadata:
   namespace: wc-test
 spec:
   k8sVersion: "1.30"
+  sylvaSourceVersion:
+    tag: 1.3.10
   infrastructure: openstack
   overridingValues:
     sylva_diskimagebuilder_version: 0.4.6
