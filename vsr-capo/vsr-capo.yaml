@@ -1,0 +1,59 @@
+kind: SylvaWorkloadCluster
+apiVersion: workloadclusteroperator.sylva/v1alpha1
+metadata:
+  name: vsr
+  namespace: vsr-capo
+spec:
+  k8sVersion: "1.31"
+  sylvaSourceVersion:
+    tag: main
+  infrastructure: openstack
+  controlPlane:
+    provider: rke2
+    replicas: 1
+  machineDeployments:
+    md1:
+      replicas: 0
+  valuesFrom:
+  - type: ExternalSecret
+    name: sylva-secret
+    valuesKey: secrets
+  overridingValues:
+    security:
+      os_images:
+        skip_signing_check: true
+    openstack:
+      storageClass:
+        type: "sylva-volume"
+    proxies:
+      http_proxy: ""
+      https_proxy: ""
+      no_proxy: ""
+    # registry_mirrors:
+    #   default_settings:
+    #     skip_verify: true
+    #     override_path: true
+    #   hosts_config:
+    #     docker.io:
+    #       - mirror_url: https://yyyy/v2/proxy_cache_docker.io
+    # oci_registry_extra_ca_certs: |-
+    #   -----BEGIN CERTIFICATE-----
+    #   MI...90
+    #   -----END CERTIFICATE-----
+    # oci_registry_insecure: true
+  clusterSettings:
+    name: vsr-capo
+    capo:
+      resources_tag: rke2-capo
+      ssh_key_name: sylva-deployer
+      network_id: cb21c2ea-5cd3-48fd-966c-7679b1b9f269
+      flavor_name: "m1.xlarge"
+      os_image_selector:
+        os: ubuntu
+        hardened: true
+      rootVolume:
+        diskSize: 160
+        volumeType: sylva-volume
+  secretValues:
+    path: wc
+    key: capo
