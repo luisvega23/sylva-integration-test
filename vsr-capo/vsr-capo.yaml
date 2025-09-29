@@ -54,10 +54,6 @@ spec:
       rootVolume:
         diskSize: 160
         volumeType: sylva-volume
-  # Delete this ! https://sylva-projects.gitlab.io/docs/1.4/installation/operators/swc
-  secretValues:
-    path: wc
-    key: capo
 ---
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
