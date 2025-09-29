@@ -6,7 +6,7 @@ metadata:
 spec:
   k8sVersion: "1.31"
   sylvaSourceVersion:
-    tag: main
+    branch: main
   infrastructure: openstack
   controlPlane:
     provider: rke2
