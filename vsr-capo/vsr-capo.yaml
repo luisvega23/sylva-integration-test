@@ -54,6 +54,24 @@ spec:
       rootVolume:
         diskSize: 160
         volumeType: sylva-volume
+  # Delete this ! https://sylva-projects.gitlab.io/docs/1.4/installation/operators/swc
   secretValues:
     path: wc
     key: capo
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: sylva-secret
+  namespace: vsr-capo
+spec:
+  data:
+  - secretKey: secrets
+    remoteRef:
+      key: secret/vsr-capo/wc/capo
+  refreshInterval: 10m
+  secretStoreRef:
+    kind: SecretStore
+    name: vsr-capo
+  target:
+    name: sylva-secret
