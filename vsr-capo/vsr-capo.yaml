@@ -33,6 +33,7 @@ spec:
     multus: true
     sriov-crd: true
     sriov-resources: true
+    sriov: true
   clusterSettings:
     name: vsr-capo
     capo:
