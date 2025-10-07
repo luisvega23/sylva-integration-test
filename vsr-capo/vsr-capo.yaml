@@ -30,12 +30,9 @@ spec:
       https_proxy: ""
       no_proxy: ""
   enabledUnits:
-    multus:
-      enabled: true
-    sriov-crd:
-      enabled: true
-    sriov-resources:
-      enabled: true
+    multus: true
+    sriov-crd: true
+    sriov-resources: true
   clusterSettings:
     name: vsr-capo
     capo:
