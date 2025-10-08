@@ -36,6 +36,11 @@ spec:
     sriov: true
   clusterSettings:
     name: vsr-capo
+    machine_deployments:
+      capo:
+        rootVolume:
+          diskSize: 160
+          volumeType: sylva-volume
     capo:
       resources_tag: rke2-capo
       ssh_key_name: sylva-deployer
@@ -47,12 +52,6 @@ spec:
       rootVolume:
         diskSize: 160
         volumeType: sylva-volume
-      machine_deployments:
-        capo:
-          rootVolume:
-            diskSize: 160
-            volumeType: sylva-volume
-
 ---
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
