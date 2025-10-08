@@ -13,7 +13,7 @@ spec:
     replicas: 1
   machineDeployments:
     md1:
-      replicas: 0
+      replicas: 1
   valuesFrom:
   - type: ExternalSecret
     name: sylva-secret
@@ -47,6 +47,12 @@ spec:
       rootVolume:
         diskSize: 160
         volumeType: sylva-volume
+      machine_deployments:
+        capo:
+          rootVolume:
+            diskSize: 160
+            volumeType: sylva-volume
+
 ---
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
