@@ -31,9 +31,9 @@ spec:
       no_proxy: ""
   enabledUnits:
     multus: true
-    # sriov-crd: true
-    # sriov-resources: true
-    # sriov: true
+    sriov-crd: true
+    sriov-resources: true
+    sriov: true
   clusterSettings:
     name: vsr-capo
     # machine_deployments:
