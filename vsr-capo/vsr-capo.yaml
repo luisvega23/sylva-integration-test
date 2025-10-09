@@ -33,7 +33,7 @@ spec:
     multus: true
     sriov-crd: true
     sriov-resources: true
-    sriov: true
+    sriov: false
   clusterSettings:
     name: vsr-capo
     # machine_deployments:
